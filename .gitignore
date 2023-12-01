@@ -1,0 +1,29 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore node modules
+node_modules/
+
+# Ignore Python build artifacts
+__pycache__/
+*.py[cod]
+
+# Ignore log files
+*.log
+
+# Ignore IDE specific files
+.idea/
+*.swp
+*.swo
+*.swn
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+.env
+
+dev-firebase-config.json
+hours-frontend/.next/cache/webpack/client-development/4.pack
+*.json
+*.pack
