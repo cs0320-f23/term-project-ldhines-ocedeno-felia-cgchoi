@@ -3,7 +3,9 @@ package server;
 import static spark.Spark.after;
 
 import data.Analytics;
+import data.mocks.WaitTimeMock;
 import handlers.AnalyticsHandler;
+import handlers.WaitTimeHandler;
 import spark.Spark;
 
 import java.io.IOException;
@@ -43,6 +45,7 @@ public class Server {
 
 
         Spark.get("/analytics", new AnalyticsHandler(new Analytics()));
+        Spark.get("/waittime", new WaitTimeHandler(new WaitTimeMock()));
 //        Spark.get("/location", new LocationHandler());
 //        Spark.get("/geo", new GeoHandler());
 //        Spark.get("/keyword", new AreaDescriptionHandler());

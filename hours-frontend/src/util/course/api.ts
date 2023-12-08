@@ -10,6 +10,8 @@ export interface Course {
     title: string;
     code: string;
     term: string;
+    totalTime: number;
+    numStudents: number;
     coursePermissions: { [key: string]: CoursePermission };
 }
 

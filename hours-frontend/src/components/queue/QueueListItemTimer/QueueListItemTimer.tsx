@@ -1,5 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
-import {Timestamp} from "@firebase/firestore";
+import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
+import firebaseApp from "@util/firebase/firebase_app.js";
 import {intervalToDuration} from "date-fns";
 import {Chip} from "@mui/material";
 
@@ -10,9 +11,8 @@ export interface QueueListItemTimerProps {
 export interface QueueListWaitTimerProps {
     claimedAt: Timestamp;
     createdAt: Timestamp;
+    course_id: String;
 }
-
-
 
 const calculateClaimDuration = (claimedAtSeconds?: number): string => {
     if (!claimedAtSeconds) {
@@ -53,7 +53,7 @@ export const QueueListItemTimer: FC<QueueListItemTimerProps> = ({claimedAt}) => 
                  style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;
 };
 
-export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, claimedAt}) => {
+export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, claimedAt, course_id}) => {
     const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
 
     useEffect(() => {
@@ -61,8 +61,24 @@ export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, cla
             setWaitTime(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds));
         }, 1000);
 
+        const db = getFirestore(firebaseApp);
+        const courseCollection = collection(db, "courses");
+        const courseDoc = doc(courseCollection, String(course_id));
+
+        const fetchCourseData = async () => {
+            const docSnapshot = await getDoc(courseDoc);
+            if (docSnapshot.exists()) {
+                updateDoc(courseDoc, {
+                    totalTime: docSnapshot.data().totalTime + waitTime,
+                    numStudents : docSnapshot.data().numStudents + 1
+                });
+            }
+        };
+
+        fetchCourseData();
+
         return () => clearInterval(waitIntervalID);
-    }, [createdAt]);
+    }, [claimedAt]);
 
     return <Chip label={waitTime} size="small" variant="outlined"
                  style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;

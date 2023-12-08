@@ -136,6 +136,7 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
                             <QueueListItemTimer 
                             claimedAt={ticket.claimedAt}
                             createdAt={ticket.createdAt}
+                            course_id={queue.id}
                             />}
                         {isMissing &&
                             <Chip label="Missing" size="small" color="error" sx={{fontWeight: 500}}/>}
