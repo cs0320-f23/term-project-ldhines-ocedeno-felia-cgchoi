@@ -1,6 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
-import firebaseApp from "@util/firebase/firebase_app.js";
+import firebaseApp from "@util/firebase/firebase_app.ts";
 import {intervalToDuration} from "date-fns";
 import {Chip} from "@mui/material";
 

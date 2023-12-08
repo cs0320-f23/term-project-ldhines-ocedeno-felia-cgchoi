@@ -27,3 +27,4 @@ dev-firebase-config.json
 hours-frontend/.next/cache/webpack/client-development/4.pack
 *.json
 *.pack
+*.xml
