@@ -42,7 +42,6 @@ go run main.go
 8. Run the frontend:
 ```bash=
 cd hours-frontend
-yarn dev
 ```
 
 ## Development

@@ -73,6 +73,14 @@ const Navbar: FC<NavbarProps> = ({
                                 Hours
                             </Link>
                         </NextLink>
+                        <NextLink href="/analytics">
+                        <Link variant="h6" component="button" color="inherit" underline="hover"
+                                  sx={{display: "inline-flex", alignItems: "center"}}>
+                                <Box mr={1} width={32} height={32}>
+                                </Box>
+                                Analytics
+                            </Link>
+                        </NextLink>
                         {startItems}
                     </Stack>
                     <Stack direction="row" alignItems="center" spacing={1.5}>

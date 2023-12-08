@@ -11,6 +11,7 @@ import getInitials from "@util/shared/getInitials";
 import QueueListItemMenu from "@components/queue/QueueListItemMenu";
 import {toast} from "react-hot-toast";
 import QueueListItemTimer from "@components/queue/QueueListItemTimer";
+import { QueueListWaitTimer } from "../QueueListItemTimer/QueueListItemTimer";
 import errors from "@util/errors";
 import Button from "@components/shared/Button";
 import {formatDistance} from "date-fns";

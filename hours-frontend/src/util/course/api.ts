@@ -5,12 +5,18 @@ export const enum CoursePermission {
     CourseStaff = "STAFF"
 }
 
+export interface Project {
+    id: string;
+    totalQueueTime: number;
+}
+
 export interface Course {
     id: string;
     title: string;
     code: string;
     term: string;
     coursePermissions: { [key: string]: CoursePermission };
+    projects: Project[]
 }
 
 /**
