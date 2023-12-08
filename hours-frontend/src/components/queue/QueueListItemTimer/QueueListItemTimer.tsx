@@ -36,8 +36,6 @@ const calculateTimeInQueue = (joinedAtSeconds?: number, claimedAtSeconds?: numbe
     }`;
 };
 
-
-
 export const QueueListItemTimer: FC<QueueListItemTimerProps> = ({claimedAt}) => {
     const [time, setTime] = useState(calculateClaimDuration(claimedAt.seconds));
 
@@ -83,21 +81,4 @@ export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, cla
     return <Chip label={waitTime} size="small" variant="outlined"
                  style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;
 };
-
-// const QueueListWaitTimer: FC<QueueListItemTimerProps> = ({claimedAt}, {createdAt}) => {
-//     const [time, setTime] = useState(calculateClaimDuration(claimedAt.seconds));
-
-//     useEffect(() => {
-//         const intervalID = setInterval(() => {
-//             setTime(calculateClaimDuration(claimedAt.seconds));
-//         }, 1000);
-
-//         return () => clearInterval(intervalID);
-//     }, [claimedAt]);
-
-//     return <Chip label={time} size="small" variant="outlined"
-//                  style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;
-// };
-
-
 
