@@ -133,7 +133,10 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
                     </Box>
                     <Box>
                         {isClaimed && ticket.claimedAt &&
-                            <QueueListItemTimer claimedAt={ticket.claimedAt}/>}
+                            <QueueListItemTimer 
+                            claimedAt={ticket.claimedAt}
+                            createdAt={ticket.createdAt}
+                            />}
                         {isMissing &&
                             <Chip label="Missing" size="small" color="error" sx={{fontWeight: 500}}/>}
                         {isReturned &&
