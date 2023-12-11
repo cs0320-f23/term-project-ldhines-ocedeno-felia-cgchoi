@@ -36,6 +36,7 @@ func CourseRoutes() *chi.Mux {
 		router.With(auth.RequireCourseAdmin()).Post("/edit", editCourseHandler)
 		router.With(auth.RequireCourseAdmin()).Post("/addPermission", addCoursePermissionHandler)
 		router.With(auth.RequireCourseAdmin()).Post("/removePermission", removeCoursePermissionHandler)
+		router.With(auth.RequireCourseAdmin()).Post("/addProject", removeCoursePermissionHandler)
 	})
 	router.With(auth.RequireAdmin()).Post("/bulkUpload", bulkUploadHandler)
 
@@ -117,6 +118,27 @@ func editCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 	w.Write([]byte("Successfully edited course " + req.CourseID))
+}
+
+func addProjectHandler(w http.ResponseWriter, r *http.Request) {
+	var req *models.AddCoursePermissionRequest
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	req.CourseID = chi.URLParam(r, "courseID")
+
+	err = repo.Repository.AddPermission(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Write([]byte("Successfully added project to " + req.CourseID))
+
 }
 
 // POST: /{courseID}/addPermission

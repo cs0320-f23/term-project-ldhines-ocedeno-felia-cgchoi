@@ -42,6 +42,11 @@ type EditCourseRequest struct {
 	Term     string `json:"term"`
 }
 
+type AddProjectRequest struct {
+	CourseID   string `json:"courseID"`
+	Project	   string `json:"projectID"`
+}
+
 type AddCoursePermissionRequest struct {
 	CourseID   string `json:"courseID"`
 	Email      string `json:"email"`

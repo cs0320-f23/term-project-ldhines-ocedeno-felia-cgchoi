@@ -1,7 +1,10 @@
 import {useEffect, useState} from "react";
-import {Course} from "@util/course/api";
-import {collection, doc, getFirestore, onSnapshot} from "@firebase/firestore";
+import {Course, Project} from "@util/course/api";
+import {collection, doc, getFirestore, onSnapshot, getDoc, updateDoc,} from "@firebase/firestore";
 import AuthAPI, {User} from "@util/auth/api";
+import firebaseApp from "@util/firebase/firebase_app";
+
+
 
 export function useCourses(): [Course[] | undefined, boolean] {
     const [loading, setLoading] = useState(true);
@@ -49,6 +52,32 @@ export function useCourseStaff(courseID: string): [User[], boolean] {
     }, [courseID]);
 
     return [staff, loading];
+}
+
+export function useCourseProjects(courseID: string) : [Project[], boolean] {
+    const [loading, setLoading] = useState(true);
+    const [projects, setProjects] = useState<Project[]>([]);
+
+    useEffect(() => {
+        if (courseID) {
+            const db = getFirestore(firebaseApp);
+            const unsubscribe = onSnapshot(doc(db, "courses", courseID), (doc) => {
+                const data = doc.data();
+                if (data && Array.isArray(data.projects)) {
+                    const ids = data.projects.map((p) => p.projectID);
+                    setProjects(ids);
+                    setProjects(ids)
+                    setLoading(false);
+                } else {
+                    setProjects([]);
+                }
+                setLoading(false);
+            });
+            return () => unsubscribe();
+        }
+    }, [courseID]);
+
+    return [projects, loading]
 }
 
 export function useInvitations(courseID: string): [string[], boolean] {

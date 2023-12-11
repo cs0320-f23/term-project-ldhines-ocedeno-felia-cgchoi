@@ -1,6 +1,6 @@
 import React, {FC, useEffect, useState} from "react";
 import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
-import firebaseApp from "@util/firebase/firebase_app.ts";
+import firebaseApp from "@util/firebase/firebase_app";
 import {intervalToDuration} from "date-fns";
 import {Chip} from "@mui/material";
 
@@ -54,6 +54,7 @@ export const QueueListItemTimer: FC<QueueListItemTimerProps> = ({claimedAt}) => 
 export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, claimedAt, course_id}) => {
     const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
 
+    // whenever claimedAt is updated, increases numStudents and totalTime in firestore
     useEffect(() => {
         const waitIntervalID = setInterval(() => {
             setWaitTime(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds));

@@ -16,7 +16,7 @@ import {
 import Button from "@components/shared/Button";
 import {useForm} from "react-hook-form";
 import QueueAPI, {CreateQueueRequest, MaskPolicy} from "@util/queue/api";
-import CourseAPI, {Course} from "@util/course/api";
+import CourseAPI, {Course, Project} from "@util/course/api";
 import {useSession} from "@util/auth/hooks";
 import {toast} from "react-hot-toast";
 import errors from "@util/errors";
@@ -32,6 +32,7 @@ type FormData = {
     description: string;
     location: string;
     courseID: string;
+    project: string;
     endTimeIndex: number;
     allowTicketEditing: boolean;
     showMeetingLinks: boolean;
@@ -66,13 +67,24 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
     });
     const {currentUser, loading} = useSession();
     const [coursePerms, setCoursePerms] = useState<Course[]>([]);
+    const [projectPerms, setProjectPerms] = useState<Project[][]>([]);
 
+    // useEffect for getting a course
     useEffect(() => {
         if (currentUser && currentUser.coursePermissions)
             Promise.all(Object.keys(currentUser.coursePermissions)
                 .map(c => CourseAPI.getCourse(c)))
                 .then(res => setCoursePerms(res));
     }, [currentUser]);
+
+    // useEffect for getting project list
+    useEffect(() => {
+        if (currentUser && currentUser.coursePermissions)
+            Promise.all(Object.keys(currentUser.coursePermissions)
+                .map(c => CourseAPI.getProjectList(c)))
+                .then(result => setProjectPerms(result));
+    }, [currentUser]);
+    
 
     if (loading) return <></>;
 
@@ -133,6 +145,29 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
                             </Select>
                         </FormControl>
                     </Stack>
+                        <FormControl fullWidth size="small" variant="standard" required>
+                            <InputLabel id="project-select-label">Project</InputLabel>
+                            {/* <Select
+                                {...register("project")}
+                                // required
+                                defaultValue={projectPerms.length > 3 ? projectPerms[3] : ""}
+                                fullWidth
+                                labelId="project-select-label"
+                                id="project-select"
+                                label="Project"
+                                type="text" */}
+                            {/* > */}
+                                {/* {projectPerms.map((projects) => 
+                                    projects.map((project) => (
+                                    <MenuItem key={project.projectID} 
+                                        value={project.projectID}>
+                                            {project.projectID} 
+                                    </MenuItem>
+                                    ))
+                                 )
+                                } */}
+                            {/* </Select> */}
+                        </FormControl>
                     <TextField
                         {...register("description")}
                         label="Description"

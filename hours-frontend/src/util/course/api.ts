@@ -6,7 +6,7 @@ export const enum CoursePermission {
 }
 
 export interface Project {
-    id: string;
+    projectID: string;
     totalQueueTime: number;
 }
 
@@ -21,6 +21,7 @@ export interface Course {
     projects: Project[]
 }
 
+
 /**
  * Gets a course with the given id.
  */
@@ -31,6 +32,17 @@ export interface Course {
         throw e;
     }
 }
+
+async function  getProjectList(courseID:string) : Promise<Project[]> {
+    try {
+        // return await APIClient.get(`/courses/${courseID}`, {});
+        const course = await getCourse(courseID);
+        return course.projects;
+    } catch (e) {
+        throw e;
+    }
+}
+
 
 /**
  * Creates a course with the given title, code, and term.
@@ -71,6 +83,17 @@ async function editCourse(courseID: string, title: string, code: string, term: s
     }
 }
 
+async function addProject(courseID: string, projectName: string): Promise<void> {
+    try {
+        await APIClient.post(`/courses/${courseID}/addProject`, {
+            projectName
+        });
+        return;
+    } catch (e) {
+        throw e;
+    }
+}
+
 /**
  * Creates a course with the given title, code, and term.
  */
@@ -99,6 +122,17 @@ async function removeCoursePermission(courseID: string, userID: string): Promise
     }
 }
 
+async function removeProject(courseID: string, projectID: string): Promise<void> {
+    try {
+        await APIClient.post(`/courses/${courseID}/removeProject`, {
+            projectID
+        });
+        return;
+    } catch (e) {
+        throw e;
+    }
+}
+
 /**
  * 
  */
@@ -113,11 +147,14 @@ async function bulkUpload(term: string, data: string): Promise<void> {
 
 const CourseAPI = {
     getCourse,
+    getProjectList,
     createCourse,
     deleteCourse,
     editCourse,
+    addProject,
     addCoursePermission,
     removeCoursePermission,
+    removeProject,
     bulkUpload,
 };
 
