@@ -44,8 +44,9 @@ public class Server {
         });
 
 
-        Spark.get("/analytics", new AnalyticsHandler(new Analytics()));
+        Spark.post("/analytics", new AnalyticsHandler(new Analytics()));
         Spark.get("/waittime", new WaitTimeHandler(new WaitTimeMock()));
+
 //        Spark.get("/location", new LocationHandler());
 //        Spark.get("/geo", new GeoHandler());
 //        Spark.get("/keyword", new AreaDescriptionHandler());
