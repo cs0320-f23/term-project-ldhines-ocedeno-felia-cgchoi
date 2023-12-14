@@ -48,7 +48,7 @@ public class Analytics {
             double weight = 0.0;
             weight += features.numOfStudents() * studentWeight;
             weight += features.totalTime() * timeWeight;
-            weight += features.numOfQueues() * queueWeight; // Note the addition because of negative weight
+            weight += features.numOfQueues() * queueWeight;
 
             return weight;
     }
