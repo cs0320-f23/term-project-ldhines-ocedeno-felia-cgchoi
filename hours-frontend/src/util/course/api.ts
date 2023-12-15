@@ -1,4 +1,6 @@
 import APIClient from "@util/APIClient";
+import firebaseApp from "@util/firebase/firebase_app";
+import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
 
 export const enum CoursePermission {
     CourseAdmin = "ADMIN",
@@ -8,6 +10,11 @@ export const enum CoursePermission {
 export interface Project {
     id: string;
     totalQueueTime: number;
+}
+
+export interface addProjectProps {
+    projectName: string;
+    course_id: string;
 }
 
 export interface Course {
@@ -21,6 +28,44 @@ export interface Course {
     projects: Project[]
 }
 
+async function updateProjects(courseID: string, projectName: string): Promise<void>{
+    const db = getFirestore(firebaseApp);
+    const courseCollection = collection(db, "courses");
+    const courseDoc = doc(courseCollection, String(courseID));
+
+    const fetchProjectData = async () => {
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const currentProjectList = docSnapshot.data().projects || [];
+            const updatedProjectList = [...currentProjectList, projectName];
+            updateDoc(courseDoc, {
+                projects: updatedProjectList
+                // currentProjectList : docSnapshot.data().projects || []
+                // projects: [docSnapshot.data().projects, projectName]
+            });
+        }
+    };
+    fetchProjectData();
+}
+
+async function removeProjects(courseID: string, projectName: string): Promise<void> {
+    const db = getFirestore(firebaseApp);
+    const courseCollection = collection(db, "courses");
+    const courseDoc = doc(courseCollection, String(courseID));
+
+    const getProjectData = async () => {
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const currentProjectList = docSnapshot.data().projects || [];
+            const updatedProjectList = currentProjectList.filter((proj: string) => proj !== projectName);
+            updateDoc(courseDoc, {
+                projects: updatedProjectList
+            });
+        }
+    };
+
+    getProjectData();
+}
 /**
  * Gets a course with the given id.
  */
@@ -119,6 +164,8 @@ const CourseAPI = {
     addCoursePermission,
     removeCoursePermission,
     bulkUpload,
+    updateProjects,
+    removeProjects
 };
 
 
