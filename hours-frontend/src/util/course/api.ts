@@ -1,6 +1,7 @@
 import APIClient from "@util/APIClient";
 import firebaseApp from "@util/firebase/firebase_app";
 import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
+import { useState } from "react";
 
 export const enum CoursePermission {
     CourseAdmin = "ADMIN",
@@ -46,6 +47,22 @@ async function updateProjects(courseID: string, projectName: string): Promise<vo
         }
     };
     fetchProjectData();
+}
+
+async function getCourseProjects(courseID: string) : Promise<string[]> {
+    const db = getFirestore(firebaseApp);
+    const courseCollection = collection(db, "courses");
+    const courseDoc = doc(courseCollection, String(courseID));
+
+    const fetchCourseProjects = async () => {
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const courseProjectList = docSnapshot.data().projects || [];
+            return courseProjectList;
+        }
+    }
+    const projectList = await fetchCourseProjects();
+    return projectList
 }
 
 async function removeProjects(courseID: string, projectName: string): Promise<void> {
@@ -165,7 +182,8 @@ const CourseAPI = {
     removeCoursePermission,
     bulkUpload,
     updateProjects,
-    removeProjects
+    removeProjects,
+    getCourseProjects
 };
 
 

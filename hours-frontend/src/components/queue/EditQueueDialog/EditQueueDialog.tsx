@@ -27,6 +27,7 @@ export interface EditQueueDialogProps {
 
 type FormData = {
     title: string;
+    project: string;
     description: string;
     endTimeIndex: number;
     location: string;
@@ -43,6 +44,7 @@ const EditQueueDialog: FC<EditQueueDialogProps> = ({queueID, queue, open, onClos
         const req: EditQueueRequest = {
             queueID: queueID,
             title: data.title,
+            project: data.project,
             description: data.description,
             location: data.location,
             endTime: times[data.endTimeIndex].timestamp,

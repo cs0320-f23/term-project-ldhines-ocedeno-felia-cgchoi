@@ -5,6 +5,7 @@ import {Timestamp} from "@firebase/firestore";
 export interface Queue {
     id: string;
     title: string;
+    project: string;
     color: string;
     description?: string;
     course: Course;
@@ -59,6 +60,7 @@ export interface Ticket {
  */
 export interface CreateQueueRequest {
     title: string;
+    project: string;
     description: string;
     location: string;
     endTime: Date;
@@ -84,6 +86,7 @@ async function createQueue(req: CreateQueueRequest): Promise<void> {
 export interface EditQueueRequest {
     queueID: string;
     title: string;
+    project: string;
     description: string;
     location: string;
     endTime: Date;
@@ -140,6 +143,7 @@ async function endQueue(queue: Queue): Promise<void> {
         await QueueAPI.editQueue({
             queueID: queue.id,
             title: queue.title,
+            project: queue.project,
             description: queue.description || "",
             endTime: new Date(),
             isCutOff: queue.isCutOff,
