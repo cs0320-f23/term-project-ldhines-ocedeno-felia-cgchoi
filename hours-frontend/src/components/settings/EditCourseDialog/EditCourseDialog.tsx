@@ -24,12 +24,15 @@ import {toast} from "react-hot-toast";
 import {useCourseStaff} from "@util/course/hooks";
 import TabPanel from "@components/shared/TabPanel";
 import errors from "@util/errors";
+import firebaseApp from "@util/firebase/firebase_app";
+import { da } from "date-fns/locale";
 
 export interface EditCourseDialogProps {
     course: Course;
     open: boolean;
     onClose: () => void;
 }
+
 
 type EditFormData = {
     courseCode: string;
@@ -42,12 +45,17 @@ type AddPermissionFormData = {
     permission: string;
 };
 
+type AddProjectFormData = {
+    projectName : string;
+}
+
 function a11yProps(index: number) {
     return {
         id: `tab-${index}`,
         'aria-controls': `tabpanel-${index}`,
     };
 }
+
 
 const DialogButtons: FC = ({children}) => {
     return <Stack direction="row-reverse" justifyContent="end" spacing={1} mt={4}>
@@ -60,7 +68,57 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
     const [editLoading, setEditLoading] = useState(false);
     const [addMemberLoading, setAddMemberLoading] = useState(false);
     const [revokeAccessLoading, setRevokeAccessLoading] = useState(false);
+    // const [addProjectLoading, setProjectLoding] = useEffect(false)
     const [invites, loadingInvites] = useInvitations(course.id);
+    const [projectList, setProjectList] = useState<string[]>([]); //useState for adding projects
+    const [addProjectLoading, setAddProjectLoading] = useState(false);
+    const [removeProjectLoading, setRemoveProjectLoading] = useState(false);
+
+    // add projects
+    // const handleAddProjectSubmit = (projectList)(data => {
+    //     CourseAPI.updateProjects(course.id, projectList.map(project => project.projectName), data.projectName)
+    // })
+
+    // add project form
+    const {
+        register: registerAddProject,
+        handleSubmit: handleAddProject,
+        reset: resetAddProject,
+        formState: {}
+    } = useForm<AddProjectFormData>();
+
+    const onAddProjectSubmit = handleAddProject(data=> {
+        setAddProjectLoading(true)
+        CourseAPI.updateProjects(course.id, data.projectName)
+            .then(() => {
+                toast.success(`Project has been successfully added to ${course.code}!`);
+                resetAddProject();
+                setAddProjectLoading(false)
+            })
+            .catch(() => {
+                toast.error("Project could not be added at this time");
+                setAddProjectLoading(false);
+            });
+        setProjectList([...projectList, data.projectName])
+        
+    } )
+
+    function handleRemoveProject(projectName : string) {
+        const confirmRemove = confirm(`Are you sure you want to remove ${projectName} from (${course.code})?`);
+        if (confirmRemove) {
+            setRemoveProjectLoading(true);
+            CourseAPI.removeProjects(course.id, projectName)
+                .then(() =>  {
+                    toast.success(`${projectName} was succesfully removed from (${course.code})!`);
+                    setRevokeAccessLoading(false);
+                })
+                .catch(() => {
+                    toast.error('Unable to add project at this time');
+                    setRemoveProjectLoading(false);
+                })
+            setProjectList(projectList.filter(project => project !== projectName));
+        }
+    }
 
     // Edit form
     const {
@@ -131,7 +189,8 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
         }
     }
 
-    const loading = loadingStaff || editLoading || addMemberLoading || revokeAccessLoading;
+
+    const loading = loadingStaff || editLoading || addMemberLoading || revokeAccessLoading || addProjectLoading;
 
     return <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted={false}>
         <Box sx={{opacity: loading ? 100 : 0}}>
@@ -145,6 +204,7 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
                       variant="fullWidth">
                     <Tab label="Course Info" {...a11yProps(0)} />
                     <Tab label="Manage Access" {...a11yProps(1)} />
+                    <Tab label="Manage Projects" {...a11yProps(2)} />
                 </Tabs>
             </Box>
             <TabPanel value={currentTab} index={0}>
@@ -183,6 +243,48 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
                     </Stack>
                     <DialogButtons>
                         <Button type="submit" variant="contained" disabled={editLoading}>Save</Button>
+                        <Button onClick={onClose}>Cancel</Button>
+                    </DialogButtons>
+                </form>
+            </TabPanel>
+            <TabPanel value={currentTab} index={2}>
+                <Paper variant="outlined" sx={{bgcolor: 'error'}}>
+                    <Box maxHeight={300} overflow="auto">
+                        <List dense>
+                            {projectList.map((projectName, index) => (
+                                <ListItem
+                                key={index}
+                                secondaryAction={
+                                    <IconButton label="Revoke access" edge="end" aria-label="delete"
+                                            disabled={revokeAccessLoading}
+                                            onClick={() => handleRemoveProject(projectName)}>
+                                        <CloseIcon/>
+                                    </IconButton>
+                                }>
+                                    <ListItemText primary={projectName} />
+                                </ListItem>))}
+                        </List>
+                    </Box> 
+                </Paper>
+                <Box my={2}>
+                    <Divider/>
+                </Box>
+                <Typography variant="h6" mb={2}>Add project</Typography>
+                <form onSubmit={onAddProjectSubmit}>
+                    <Stack spacing={2}>
+                    <TextField
+                            {...registerAddProject("projectName")}
+                            required
+                            label="Project"
+                            type="text"
+                            autoComplete="off"
+                            fullWidth
+                            size="small"
+                            variant="standard"
+                        />
+                    </Stack>
+                    <DialogButtons>
+                        <Button type="submit" variant="contained" disabled={addMemberLoading}>Add project</Button>
                         <Button onClick={onClose}>Cancel</Button>
                     </DialogButtons>
                 </form>
