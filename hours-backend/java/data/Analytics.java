@@ -1,21 +1,62 @@
 package data;
 
-public class Analytics implements AnalyticsDatasource {
+import java.util.ArrayList;
+import java.util.List;
 
-    private int[][] data;
+public class Analytics {
 
+   private  List<AnalyticProject> projects;
     public Analytics() {
-        this.data = new int[][]{
-                {17, 42, 89, 23, 55},
-                {10, 37, 61, 98, 5},
-                {73, 28, 49, 82, 14},
-                {34, 67, 91, 11, 76},
-                {19, 84, 3, 46, 70}
-        };
+
     }
 
-    @Override
-    public int[][] getData() {
-        return this.data;
+    public void processProjects(List<Project> projects, boolean useRank){
+        this.projects = new ArrayList<>();
+      for (Project project: projects){
+          double averageWaitTime = this.calculateAverageWaitTime(project);
+          double weight = this.calculateWeight(project);
+
+          AnalyticProject newProject = new AnalyticProject(weight,project,averageWaitTime);
+          this.projects.add(newProject);
+      }
+      if (useRank){
+          this.sortProjectsByWeight(this.projects);
+      }
     }
+
+
+
+
+    public double calculateAverageWaitTime(Project project){
+        double totalTime = project.features().totalTime() / 60; //convert to minutes
+        double totalSignups = project.features().numOfStudents();
+        return totalTime / totalSignups;
+    }
+
+    private void sortProjectsByWeight(List<AnalyticProject> projects) {
+        projects.sort((p1, p2) -> Double.compare(p2.getWeight(), p1.getWeight()));
+    }
+
+    public double calculateWeight(Project project){
+            //Project A and Project B have the same amount of signups, but Project A has more queues so A needs more attention
+            ProjectFeatures features = project.features();
+
+            double studentWeight = 1.0; // Higher weight, more signups -> project needs more attention
+            double queueWeight = -0.5;  // Negative weight, more queues means project has more attention already
+            double timeWeight = 0.8;    // Positive weight, similar to signups but less significant
+
+            double weight = 0.0;
+            weight += features.numOfStudents() * studentWeight;
+            weight += features.totalTime() * timeWeight;
+            weight += features.numOfQueues() * queueWeight;
+
+            return weight;
+    }
+
+    public List<AnalyticProject> getData(){
+        return new ArrayList<>(this.projects);
+
+    }
+
+
 }
