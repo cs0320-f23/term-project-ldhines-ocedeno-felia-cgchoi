@@ -42,6 +42,7 @@ type FormData = {
 
 
 const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
+    const [numOfQueues, setNumOfQueues] = useState(0);
 
     const times = getNextHours();
     const {register, handleSubmit, reset, formState: {}} = useForm<FormData>();
@@ -61,7 +62,8 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
             success: "Queue created",
             error: errors.UNKNOWN,
         })
-            .then(() => {
+            .then(async () => {
+                await CourseAPI.updateProjectQueueFeatures(data.courseID, data.project);
                 reset();
                 onClose();
             })
@@ -95,6 +97,7 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
         }
     }, [currentUser]);
 
+   
     
     // useEffect(() => {
     //     const fetchProjects = async () => {

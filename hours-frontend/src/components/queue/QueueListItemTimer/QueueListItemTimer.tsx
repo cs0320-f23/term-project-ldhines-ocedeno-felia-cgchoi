@@ -55,17 +55,18 @@ export const QueueListItemTimer: FC<QueueListItemTimerProps> = ({claimedAt}) => 
 
 
 export const QueueListWaitTimer = async (createdAt : Timestamp, claimedAt :Timestamp, courseID : string, projectName: string) => {
-    const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
+    // const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
+    const waitTime = calculateTimeInQueue(createdAt.seconds, claimedAt.seconds);
 
-    useEffect(() => {
-        const intervalID = setInterval(() => {
-            const newWaitTime = calculateTimeInQueue(createdAt.seconds, claimedAt.seconds);
-            setWaitTime(newWaitTime);
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalID = setInterval(() => {
+    //         const newWaitTime = calculateTimeInQueue(createdAt.seconds, claimedAt.seconds);
+    //         setWaitTime(newWaitTime);
+    //     }, 1000);
 
-        return () => clearInterval(intervalID);
-    }, [createdAt, claimedAt]);
+    //     return () => clearInterval(intervalID);
+    // }, [createdAt, claimedAt]);
 
-    await CourseAPI.updateProjectFeatures(courseID, projectName, waitTime);
+    await CourseAPI.updateProjectTimeFeatures(courseID, projectName, waitTime);
 };
 

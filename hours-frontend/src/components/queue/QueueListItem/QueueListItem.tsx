@@ -46,10 +46,10 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
         QueueAPI.editTicket(ticket.id, ticket.user.UserID, queue.id, TicketStatus.StatusClaimed, ticket.description)
             .catch(() => toast.error(errors.UNKNOWN));
 
-        QueueAPI.editTicket(ticket.id, ticket.user.UserID, queue.id, TicketStatus.StatusClaimed, ticket.description)
-        .catch(() => toast.error(errors.UNKNOWN));
-
         if (ticket.claimedAt) {
+            // for (const i in queue.course.projects) {
+            //     if queue.course.projects[i].projectName === que
+            // }
             QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, queue.course.id, queue.project.projectName);
         }
         //queue.projects[queue.course.id].projectName

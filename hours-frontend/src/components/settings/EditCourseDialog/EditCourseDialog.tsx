@@ -74,10 +74,6 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
     const [addProjectLoading, setAddProjectLoading] = useState(false);
     const [removeProjectLoading, setRemoveProjectLoading] = useState(false);
 
-    // add projects
-    // const handleAddProjectSubmit = (projectList)(data => {
-    //     CourseAPI.updateProjects(course.id, projectList.map(project => project.projectName), data.projectName)
-    // })
 
     // add project form
     const {
@@ -86,6 +82,21 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
         reset: resetAddProject,
         formState: {}
     } = useForm<AddProjectFormData>();
+
+    const fetchProjectList = async () => {
+        if (course.id) {
+            try {
+                const updatedProjects = await CourseAPI.getCourseProjectNames(course.id);
+                setProjectList(updatedProjects);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchProjectList();
+    }, [course.id, open]);
 
     const onAddProjectSubmit = handleAddProject(data=> {
         setAddProjectLoading(true)
@@ -100,7 +111,7 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
                 setAddProjectLoading(false);
             });
         setProjectList([...projectList, data.projectName])
-        console.log(data.projectName)
+        
         console.log(projectList)
         CourseAPI.getCourseProjectNames(course.id)
         

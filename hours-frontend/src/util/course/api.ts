@@ -106,7 +106,7 @@ async function updateProjects(courseID : string, projectName : string) {
 //     fetchProjectData();
 // }
 
-async function updateProjectFeatures(courseID: string, projectName: string, waitTime: string) : Promise<void> {
+async function updateProjectTimeFeatures(courseID: string, projectName: string, waitTime: string) : Promise<void> {
     const db = getFirestore(firebaseApp);
     const courseDoc = doc(db, "courses", courseID);
 
@@ -118,9 +118,11 @@ async function updateProjectFeatures(courseID: string, projectName: string, wait
             if (project) {
                 const time = docSnapshot.data().totalTime || 0;
                 const currNum = docSnapshot.data().numStudents || 0;
+                const queueCount = docSnapshot.data().numOfQueues || 0;
                 const updatedFeatures = {
                     totalTime : time + waitTime,
-                    numOfStudents : currNum + 1
+                    numOfStudents : currNum + 1,
+                    queueCount : queueCount
                 }
                 await updateDoc(courseDoc, {
                     [`projects.${projectName}.features`]: updatedFeatures
@@ -129,6 +131,35 @@ async function updateProjectFeatures(courseID: string, projectName: string, wait
                 console.error("Project features could not be updated:", error);
             }
 }
+
+async function updateProjectQueueFeatures(courseID : string, projectName : string) : Promise<void> {
+    const db = getFirestore(firebaseApp);
+    const courseDoc = doc(db, "courses", courseID);
+
+    try {
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const project = docSnapshot.data().projects[projectName];
+
+            if (project) {
+                const time = docSnapshot.data().totalTime || 0;
+                const currNum = docSnapshot.data().numStudents || 0;
+                const updatedQueueCount = project.features.numOfQueues ? project.features.numOfQueues + 1 : 0;
+                const features = {
+                    totalTime : time,
+                    numOfStudents : currNum,
+                    numOfQueues : updatedQueueCount
+                }
+                await updateDoc(courseDoc, {
+                    [`projects.${projectName}.features`]: features
+                })
+
+            }
+        }} catch (error) {
+            console.error("Project features could not be updated:", error);
+            }
+        }
+    
 
 
 async function getCourseProjectNames(courseID: string) : Promise<string[]> { // updated - working i think
@@ -149,30 +180,30 @@ async function getCourseProjectNames(courseID: string) : Promise<string[]> { // 
     return fetchCourseProjects(); 
 }
 
-async function getCourseProjects(courseID: string) : Promise<Project[]> { // updated
-    const db = getFirestore(firebaseApp);
-    const courseDoc = doc(db, "courses", courseID);
+// async function getCourseProjects(courseID: string) : Promise<Project[]> { // updated
+//     const db = getFirestore(firebaseApp);
+//     const courseDoc = doc(db, "courses", courseID);
 
-    const fetchCourseProjects = async () => {
-        const docSnapshot = await getDoc(courseDoc);
-        if (docSnapshot.exists()) {
-            const courseProjects = docSnapshot.data().projects || {};
-            // return courseProjects;
+//     const fetchCourseProjects = async () => {
+//         const docSnapshot = await getDoc(courseDoc);
+//         if (docSnapshot.exists()) {
+//             const courseProjects = docSnapshot.data().projects || {};
+//             // return courseProjects;
 
-            const courseProjectList = Object.keys(courseProjects).map((projectKey) => {
-                const projectData = courseProjectList[projectKey];
-                return {
-                    projectName : projectData.projectName, //issue is that key is a string and courseProjects is the list of projects but the key does not map to this
-                    features: projectData.projectFeatures
-                }
-            });
-            return courseProjectList;
-        } else {
-            return [];
-        }
-    }
-    return fetchCourseProjects(); 
-}
+//             const courseProjectList = Object.keys(courseProjects).map((projectKey) => {
+//                 const projectData = courseProjectList[projectKey];
+//                 return {
+//                     projectName : projectData.projectName, //issue is that key is a string and courseProjects is the list of projects but the key does not map to this
+//                     features: projectData.projectFeatures
+//                 }
+//             });
+//             return courseProjectList;
+//         } else {
+//             return [];
+//         }
+//     }
+//     return fetchCourseProjects(); 
+// }
 
 
 async function removeProjects(courseID: string, projectName: string): Promise<void> {
@@ -320,7 +351,8 @@ const CourseAPI = {
     removeProjects,
     // getCourseProjects,
     getCourseProjectNames,
-    updateProjectFeatures
+    updateProjectTimeFeatures,
+    updateProjectQueueFeatures
 };
 
 
