@@ -20,8 +20,9 @@ export default function Analytics() {
       const fetchDataAndUpdate = async () => {
 
           const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
-          await DataTransferAPI.sendJSONtoBackend("url", dataFromFirestore);
-          const processedData = await DataTransferAPI.fetchJSONfromBackend("url");
+          await DataTransferAPI.sendJSONtoBackend("http://localhost:3000", dataFromFirestore);
+          const processedData = await DataTransferAPI.fetchJSONfromBackend("http://localhost:3000");
+          console.log(processedData)
           setAnalyticsData(processedData)
 
           

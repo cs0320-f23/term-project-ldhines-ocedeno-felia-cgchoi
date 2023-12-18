@@ -22,6 +22,7 @@ public class WaitTimeHandler implements Route {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+    
         String seconds = request.queryParams("seconds");
         String numStudents = request.queryParams("num");
 

@@ -47,16 +47,27 @@ async function fetchJSONfromBackend(backendUrl: string) : Promise<any> {
                 'Content-Type': 'application/json',
             },
         });
+        console.log(response.text())
 
         if (!response.ok) {
             throw new Error(`HTTP error - status: ${response.status}`);
         }
-
-        const data = await response.json(); 
-        return data; 
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const data = await response.json(); 
+            return data; 
+        } else {
+            throw new Error("Not a JSON response");
+        }
     } catch (error) {
         console.error("Error fetching data from backend:", error);
     }
+
+    //     const data = await response.json(); 
+    //     return data; 
+    // } catch (error) {
+    //     console.error("Error fetching data from backend:", error);
+    // }
 }
 
     const DataTransferAPI = {
