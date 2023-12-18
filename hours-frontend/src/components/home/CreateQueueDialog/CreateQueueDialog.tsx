@@ -29,6 +29,7 @@ export interface CreateQueueDialogProps {
 
 type FormData = {
     title: string;
+    project: string;
     description: string;
     location: string;
     courseID: string;
@@ -39,7 +40,10 @@ type FormData = {
     faceMaskPolicy: MaskPolicy;
 };
 
+
 const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
+    const [numOfQueues, setNumOfQueues] = useState(0);
+
     const times = getNextHours();
     const {register, handleSubmit, reset, formState: {}} = useForm<FormData>();
     const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +62,8 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
             success: "Queue created",
             error: errors.UNKNOWN,
         })
-            .then(() => {
+            .then(async () => {
+                await CourseAPI.updateProjectQueueFeatures(data.courseID, data.project);
                 reset();
                 onClose();
             })
@@ -66,6 +71,7 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
     });
     const {currentUser, loading} = useSession();
     const [coursePerms, setCoursePerms] = useState<Course[]>([]);
+    const [courseProjects, setCourseProjects] = useState<string[]>([]);
 
     useEffect(() => {
         if (currentUser && currentUser.coursePermissions)
@@ -73,8 +79,36 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
                 .map(c => CourseAPI.getCourse(c)))
                 .then(res => setCoursePerms(res));
     }, [currentUser]);
+    
+    useEffect(() => {
+        if (currentUser && currentUser.coursePermissions) {
+            Promise.all(
+                Object.keys(currentUser.coursePermissions)
+                    .map(courseID => CourseAPI.getCourseProjectNames(courseID))
+            )
+            .then(res => {
+                const courseProjectList = res.flat();
+                console.log("testing" + courseProjectList)
+                setCourseProjects(courseProjectList);
+            })
+            .catch(error => {
+                console.error("There was an error loading the projects: ", error);
+            });
+        }
+    }, [currentUser]);
 
-    if (loading) return <></>;
+   
+    
+    // useEffect(() => {
+    //     const fetchProjects = async () => {
+    //         const fetchedProjects = await CourseAPI.getCourseProjects(); // Replace with your actual API call to Firestore
+    //         setProjects(fetchedProjects);
+    //     };
+
+    //     fetchProjects();
+    // }, []); 
+
+    if (loading) return <></>
 
     return <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted={false}>
         <form onSubmit={onSubmit}>
@@ -107,6 +141,35 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
                         size="small"
                         variant="standard"
                     />
+                    <FormControl fullWidth size="small" variant="standard">
+                        <InputLabel id="course-select-label">Project</InputLabel>
+                        <Select
+                            {...register("project")}
+                            required
+                            defaultValue={courseProjects.length > 3 ? courseProjects[3] : ""}
+                            fullWidth
+                            labelId="project-select-label"
+                            id="project-select"
+                            label="Project"
+                            type="text"
+                        >
+                            {courseProjects.map((projectName, index) => (
+                                <MenuItem key={index} value={projectName}>
+                                    {projectName}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    {/* <TextField
+                        {...register("project")}
+                        required
+                        autoFocus
+                        label="Project"
+                        type="text"
+                        fullWidth
+                        size="small"
+                        variant="standard"
+                    /> */}
                     <Stack direction="row" spacing={1.5}>
                         <TextField
                             {...register("location")}

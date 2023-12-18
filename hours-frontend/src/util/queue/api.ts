@@ -1,10 +1,12 @@
 import APIClient from "@util/APIClient";
-import {Course} from "@util/course/api";
+import {Course, Project} from "@util/course/api";
 import {Timestamp} from "@firebase/firestore";
 
 export interface Queue {
     id: string;
     title: string;
+    project: Project;
+    // projectName : projects["projectName"];
     color: string;
     description?: string;
     course: Course;
@@ -44,6 +46,7 @@ export interface TicketUserdata {
 
 export interface Ticket {
     id: string;
+    projectName: string;
     user: TicketUserdata;
     createdAt: Timestamp;
     completedAt?: Timestamp;
@@ -59,6 +62,7 @@ export interface Ticket {
  */
 export interface CreateQueueRequest {
     title: string;
+    project: string;
     description: string;
     location: string;
     endTime: Date;
@@ -84,6 +88,7 @@ async function createQueue(req: CreateQueueRequest): Promise<void> {
 export interface EditQueueRequest {
     queueID: string;
     title: string;
+    project: string;
     description: string;
     location: string;
     endTime: Date;
@@ -140,6 +145,7 @@ async function endQueue(queue: Queue): Promise<void> {
         await QueueAPI.editQueue({
             queueID: queue.id,
             title: queue.title,
+            project: queue.project.projectName,
             description: queue.description || "",
             endTime: new Date(),
             isCutOff: queue.isCutOff,

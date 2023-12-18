@@ -3,6 +3,7 @@ import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@fire
 import firebaseApp from "@util/firebase/firebase_app";
 import {intervalToDuration} from "date-fns";
 import {Chip} from "@mui/material";
+import CourseAPI, { Project } from "@util/course/api";
 
 export interface QueueListItemTimerProps {
     claimedAt: Timestamp;
@@ -11,7 +12,8 @@ export interface QueueListItemTimerProps {
 export interface QueueListWaitTimerProps {
     claimedAt: Timestamp;
     createdAt: Timestamp;
-    course_id: String;
+    courseID: string;
+    projectName: string;
 }
 
 const calculateClaimDuration = (claimedAtSeconds?: number): string => {
@@ -25,7 +27,7 @@ const calculateClaimDuration = (claimedAtSeconds?: number): string => {
     }`;
 };
 
-const calculateTimeInQueue = (joinedAtSeconds?: number, claimedAtSeconds?: number): string => {
+export const calculateTimeInQueue = (joinedAtSeconds?: number, claimedAtSeconds?: number): string => {
     if (!claimedAtSeconds || !joinedAtSeconds) {
         return '';
     }
@@ -51,34 +53,20 @@ export const QueueListItemTimer: FC<QueueListItemTimerProps> = ({claimedAt}) => 
                  style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;
 };
 
-export const QueueListWaitTimer:  FC<QueueListWaitTimerProps> = ({createdAt, claimedAt, course_id}) => {
-    const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
 
-    useEffect(() => {
-        const waitIntervalID = setInterval(() => {
-            setWaitTime(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds));
-        }, 1000);
+export const QueueListWaitTimer = async (createdAt : Timestamp, claimedAt :Timestamp, courseID : string, projectName: string) => {
+    // const [waitTime, setWaitTime] = useState(calculateTimeInQueue(createdAt.seconds, claimedAt.seconds))
+    const waitTime = calculateTimeInQueue(createdAt.seconds, claimedAt.seconds);
 
-        const db = getFirestore(firebaseApp);
-        const courseCollection = collection(db, "courses");
-        const courseDoc = doc(courseCollection, String(course_id));
+    // useEffect(() => {
+    //     const intervalID = setInterval(() => {
+    //         const newWaitTime = calculateTimeInQueue(createdAt.seconds, claimedAt.seconds);
+    //         setWaitTime(newWaitTime);
+    //     }, 1000);
 
-        const fetchCourseData = async () => {
-            const docSnapshot = await getDoc(courseDoc);
-            if (docSnapshot.exists()) {
-                updateDoc(courseDoc, {
-                    totalTime: docSnapshot.data().totalTime + waitTime,
-                    numStudents : docSnapshot.data().numStudents + 1
-                });
-            }
-        };
+    //     return () => clearInterval(intervalID);
+    // }, [createdAt, claimedAt]);
 
-        fetchCourseData();
-
-        return () => clearInterval(waitIntervalID);
-    }, [claimedAt]);
-
-    return <Chip label={waitTime} size="small" variant="outlined"
-                 style={{width: "9ch", overflow: "hidden", fontWeight: 500}}/>;
+    await CourseAPI.updateProjectTimeFeatures(courseID, projectName, waitTime);
 };
 

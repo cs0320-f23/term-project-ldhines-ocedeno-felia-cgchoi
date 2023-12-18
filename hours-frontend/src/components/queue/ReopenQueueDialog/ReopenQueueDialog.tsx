@@ -36,6 +36,7 @@ const ReopenQueueDialog: FC<ReopenQueueDialogProps> = ({queueID, queue, open, on
         const req: EditQueueRequest = {
             queueID: queueID,
             title: queue.title,
+            project: project,
             description: queue.description!,
             location: queue.location,
             endTime: times[data.endTimeIndex].timestamp,
