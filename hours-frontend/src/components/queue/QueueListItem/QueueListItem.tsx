@@ -63,6 +63,10 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
         setInterval(() => setElapsedTime(formatElapsedTime(ticket)), 5000);
     });
 
+    useEffect(() => {
+        QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, ticket.id)
+    })
+
     return (<>
         <EditTicketDialog open={editTicketDialog} onClose={() => setEditTicketDialog(false)} ticket={ticket}
                           queueID={queue.id}/>

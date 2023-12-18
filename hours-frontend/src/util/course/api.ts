@@ -2,21 +2,29 @@ import APIClient from "@util/APIClient";
 import firebaseApp from "@util/firebase/firebase_app";
 import {Timestamp, doc, getDoc, updateDoc, getFirestore, collection} from "@firebase/firestore";
 import { useState } from "react";
+import { calculateTimeInQueue } from "@components/queue/QueueListItemTimer/QueueListItemTimer";
 
 export const enum CoursePermission {
     CourseAdmin = "ADMIN",
     CourseStaff = "STAFF"
 }
 
-export interface Project {
-    id: string;
-    totalQueueTime: number;
+export interface ProjectFeatures {
+    totalTime : number;
+    numOfStudents : number;
+    numOfQueues : number;
 }
 
-export interface addProjectProps {
+export interface Project {
     projectName: string;
-    course_id: string;
+    features: ProjectFeatures;
 }
+
+// export interface addProjectProps {
+//     projectName: string;
+//     course_id: string;
+
+// }
 
 export interface Course {
     id: string;
@@ -29,41 +37,84 @@ export interface Course {
     projects: Project[]
 }
 
-async function updateProjects(courseID: string, projectName: string): Promise<void>{
+async function updateProjects(courseID: string, projectName: string): Promise<void>{ // updated
     const db = getFirestore(firebaseApp);
-    const courseCollection = collection(db, "courses");
-    const courseDoc = doc(courseCollection, String(courseID));
+    const courseDoc = doc(db, "courses", courseID);
 
     const fetchProjectData = async () => {
         const docSnapshot = await getDoc(courseDoc);
         if (docSnapshot.exists()) {
-            const currentProjectList = docSnapshot.data().projects || [];
-            const updatedProjectList = [...currentProjectList, projectName];
+            const currentProjectList : Project[] = docSnapshot.data().projects || {};
+            //default features when a new project is created
+            const defaultProjectFeatures : ProjectFeatures = {
+                totalTime : 0,
+                numOfStudents : 0,
+                numOfQueues : 0
+            }
+            const newProject : Project = {
+                projectName : projectName,
+                features : defaultProjectFeatures
+            }
+
+            const updatedProjectList = [...currentProjectList, newProject];
+
             updateDoc(courseDoc, {
                 projects: updatedProjectList
-                // currentProjectList : docSnapshot.data().projects || []
-                // projects: [docSnapshot.data().projects, projectName]
             });
         }
     };
     fetchProjectData();
 }
 
-async function getCourseProjects(courseID: string) : Promise<string[]> {
+async function updateProjectFeatures(courseID: string, projectName: string, waitTime: string) : Promise<void> {
     const db = getFirestore(firebaseApp);
-    const courseCollection = collection(db, "courses");
-    const courseDoc = doc(courseCollection, String(courseID));
+    const courseDoc = doc(db, "courses", courseID);
+
+    try{
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const project = docSnapshot.data().projects[projectName];
+
+            if (project) {
+                const time = docSnapshot.data().totalTime || 0;
+                const currNum = docSnapshot.data().numStudents || 0;
+                const updatedFeatures = {
+                    totalTime : time + waitTime,
+                    numOfStudents : currNum + 1
+                }
+                await updateDoc(courseDoc, {
+                    [`projects.${projectName}.features`]: updatedFeatures
+                })}};
+            } catch (error) {
+                console.error("Project features could not be updated:", error);
+            }
+}
+
+
+async function getCourseProjects(courseID: string) : Promise<Project[]> { // updated
+    const db = getFirestore(firebaseApp);
+    const courseDoc = doc(db, "courses", courseID);
 
     const fetchCourseProjects = async () => {
         const docSnapshot = await getDoc(courseDoc);
         if (docSnapshot.exists()) {
-            const courseProjectList = docSnapshot.data().projects || [];
+            const courseProjects = docSnapshot.data().projects || {};
+            // return courseProjects;
+
+            const courseProjectList = Object.keys(courseProjects).map((key) => {
+                return {
+                    projectName : key,
+                    features: courseProjects[key].projectFeatures
+                }
+            });
             return courseProjectList;
+        } else {
+            return [];
         }
     }
-    const projectList = await fetchCourseProjects();
-    return projectList
+    return fetchCourseProjects(); 
 }
+
 
 async function removeProjects(courseID: string, projectName: string): Promise<void> {
     const db = getFirestore(firebaseApp);
@@ -183,7 +234,8 @@ const CourseAPI = {
     bulkUpload,
     updateProjects,
     removeProjects,
-    getCourseProjects
+    getCourseProjects,
+    updateProjectFeatures
 };
 
 
