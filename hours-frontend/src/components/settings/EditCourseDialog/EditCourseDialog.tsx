@@ -100,6 +100,9 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
                 setAddProjectLoading(false);
             });
         setProjectList([...projectList, data.projectName])
+        console.log(data.projectName)
+        console.log(projectList)
+        CourseAPI.getCourseProjectNames(course.id)
         
     } )
 

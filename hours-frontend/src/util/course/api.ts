@@ -37,34 +37,74 @@ export interface Course {
     projects: Project[]
 }
 
-async function updateProjects(courseID: string, projectName: string): Promise<void>{ // updated
+async function updateProjects(courseID : string, projectName : string) {
     const db = getFirestore(firebaseApp);
     const courseDoc = doc(db, "courses", courseID);
 
-    const fetchProjectData = async () => {
+    try {
         const docSnapshot = await getDoc(courseDoc);
         if (docSnapshot.exists()) {
-            const currentProjectList : Project[] = docSnapshot.data().projects || {};
-            //default features when a new project is created
-            const defaultProjectFeatures : ProjectFeatures = {
-                totalTime : 0,
-                numOfStudents : 0,
-                numOfQueues : 0
-            }
-            const newProject : Project = {
-                projectName : projectName,
-                features : defaultProjectFeatures
+            const courseData = docSnapshot.data();
+            let currentProjects  = courseData.projects;
+
+            if (typeof currentProjects !== 'object' || currentProjects === null) {
+                currentProjects = {};
             }
 
-            const updatedProjectList = [...currentProjectList, newProject];
+            if (currentProjects.hasOwnProperty(projectName)) {
+                console.log("Project already exists in ${courseID}");
+                return;
+            }
 
-            updateDoc(courseDoc, {
-                projects: updatedProjectList
-            });
-        }
-    };
-    fetchProjectData();
+            currentProjects[projectName] = {
+                projectName: projectName,
+                features: { 
+                    totalTime : 0, 
+                    numOfStudents : 0, 
+                    numOfQueues : 0 
+                }};
+                
+            await updateDoc(courseDoc, { 
+                projects: currentProjects });
+        } 
+    } catch (error) {
+        console.error("Error updating projects:", error);
+    }
 }
+
+// async function updateProjects(courseID: string, projectName: string): Promise<void>{ // updated - working
+//     const db = getFirestore(firebaseApp);
+//     const courseDoc = doc(db, "courses", courseID);
+
+//     const fetchProjectData = async () => {
+//         const docSnapshot = await getDoc(courseDoc);
+//         if (docSnapshot.exists()) {
+//             // const courseData = docSnapshot.data();
+//             const currentProjectList = docSnapshot.data().projects || {};
+            
+//             //default features when a new project is created
+//             const defaultProjectFeatures : ProjectFeatures = {
+//                 totalTime : 0,
+//                 numOfStudents : 0,
+//                 numOfQueues : 0
+//             }
+//             const newProject : Project = {
+//                 projectName : projectName,
+//                 features : defaultProjectFeatures
+//             }
+
+//             // currentProjectList[projectName] = newProject;
+
+
+//             const updatedProjectList = [...currentProjectList, newProject];
+
+//             updateDoc(courseDoc, {
+//                 projects: updatedProjectList
+//             });
+//         }
+//     };
+//     fetchProjectData();
+// }
 
 async function updateProjectFeatures(courseID: string, projectName: string, waitTime: string) : Promise<void> {
     const db = getFirestore(firebaseApp);
@@ -91,7 +131,7 @@ async function updateProjectFeatures(courseID: string, projectName: string, wait
 }
 
 
-async function getCourseProjectNames(courseID: string) : Promise<string[]> { // updated
+async function getCourseProjectNames(courseID: string) : Promise<string[]> { // updated - working i think
     const db = getFirestore(firebaseApp);
     const courseDoc = doc(db, "courses", courseID);
 
@@ -99,9 +139,9 @@ async function getCourseProjectNames(courseID: string) : Promise<string[]> { // 
         const docSnapshot = await getDoc(courseDoc);
         if (docSnapshot.exists()) {
             const courseProjects: { [key: string]: Project }  = docSnapshot.data().projects || {};
-            // return courseProjects;
 
-            return Object.values(courseProjects).map(project => project.projectName);
+            const courseProjectNames : string[] = Object.values(courseProjects).map(project => project.projectName);
+            return courseProjectNames;
         } else {
             return [];
         }
@@ -109,30 +149,30 @@ async function getCourseProjectNames(courseID: string) : Promise<string[]> { // 
     return fetchCourseProjects(); 
 }
 
-// async function getCourseProjects(courseID: string) : Promise<Project[]> { // updated
-//     const db = getFirestore(firebaseApp);
-//     const courseDoc = doc(db, "courses", courseID);
+async function getCourseProjects(courseID: string) : Promise<Project[]> { // updated
+    const db = getFirestore(firebaseApp);
+    const courseDoc = doc(db, "courses", courseID);
 
-//     const fetchCourseProjects = async () => {
-//         const docSnapshot = await getDoc(courseDoc);
-//         if (docSnapshot.exists()) {
-//             const courseProjects = docSnapshot.data().projects || {};
-//             // return courseProjects;
+    const fetchCourseProjects = async () => {
+        const docSnapshot = await getDoc(courseDoc);
+        if (docSnapshot.exists()) {
+            const courseProjects = docSnapshot.data().projects || {};
+            // return courseProjects;
 
-//             const courseProjectList = Object.keys(courseProjects).map((projectKey) => {
-//                 const projectData = courseProjectList[projectKey];
-//                 return {
-//                     projectName : projectData.projectName, //issue is that key is a string and courseProjects is the list of projects but the key does not map to this
-//                     features: projectData.projectFeatures
-//                 }
-//             });
-//             return courseProjectList;
-//         } else {
-//             return [];
-//         }
-//     }
-//     return fetchCourseProjects(); 
-// }
+            const courseProjectList = Object.keys(courseProjects).map((projectKey) => {
+                const projectData = courseProjectList[projectKey];
+                return {
+                    projectName : projectData.projectName, //issue is that key is a string and courseProjects is the list of projects but the key does not map to this
+                    features: projectData.projectFeatures
+                }
+            });
+            return courseProjectList;
+        } else {
+            return [];
+        }
+    }
+    return fetchCourseProjects(); 
+}
 
 
 async function removeProjects(courseID: string, projectName: string): Promise<void> {
@@ -145,24 +185,34 @@ async function removeProjects(courseID: string, projectName: string): Promise<vo
             const courseProjects: { [key: string]: Project } = docSnapshot.data().projects || {}
             let projectKeyToDelete = null;
 
-            for (const key in courseProjects) {
-                if (courseProjects[key].projectName === projectName) {
-                    projectKeyToDelete = key;
+            for (const proj in courseProjects) {
+                if (courseProjects[proj].projectName === projectName) {
+                    projectKeyToDelete = proj;
+                    console.log("projectKeytoDelete = " + projectKeyToDelete);
                     break;
                 }
             }
-            console.log("pre deleted " + courseProjects)
-            if (projectKeyToDelete !== null) {
-                delete courseProjects[projectKeyToDelete];
-                console.log("deleted")
 
+
+            if (projectKeyToDelete !== null) {
+                console.log("these are my course projects" + courseProjects)
+                delete courseProjects[projectKeyToDelete];
+                console.log(courseProjects)
+               
+                await updateDoc(courseDoc, {
+                    projects: courseProjects,
+                
+                });
+
+                console.log(courseProjects[projectKeyToDelete] + "project deleted")
             }
 
             await updateDoc(courseDoc, {
                 projects: courseProjects,
             
             });
-            console.log("this is" + courseProjects)
+            console.log("this is being reached")
+            console.log("new course projects after deletion" + courseProjects)
         } 
         } catch (error) {
             console.error("Project could not be removed:", error);
