@@ -16,6 +16,7 @@ import errors from "@util/errors";
 import Button from "@components/shared/Button";
 import {formatDistance} from "date-fns";
 
+
 export interface QueueListItemProps {
     queue: Queue;
     ticket: Ticket;
@@ -40,9 +41,18 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
     const isTA = (currentUser != undefined) && (currentUser.coursePermissions[queue.course.id] != undefined);
     const isTicketOwner = (currentUser != undefined) && (ticket.user.Email === currentUser.email);
 
+    //TODO: check if this is actually connecting the project name 
     function handleClaimTicket() {
         QueueAPI.editTicket(ticket.id, ticket.user.UserID, queue.id, TicketStatus.StatusClaimed, ticket.description)
             .catch(() => toast.error(errors.UNKNOWN));
+
+        QueueAPI.editTicket(ticket.id, ticket.user.UserID, queue.id, TicketStatus.StatusClaimed, ticket.description)
+        .catch(() => toast.error(errors.UNKNOWN));
+
+        if (ticket.claimedAt) {
+            QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, queue.course.id, queue.project.projectName);
+        }
+        //queue.projects[queue.course.id].projectName
     }
 
     function handleMarkReturned() {
@@ -63,9 +73,9 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
         setInterval(() => setElapsedTime(formatElapsedTime(ticket)), 5000);
     });
 
-    useEffect(() => {
-        QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, ticket.id)
-    })
+    // useEffect(() => {
+    //     QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, ticket.id, ticket.pr)
+    // })
 
     return (<>
         <EditTicketDialog open={editTicketDialog} onClose={() => setEditTicketDialog(false)} ticket={ticket}

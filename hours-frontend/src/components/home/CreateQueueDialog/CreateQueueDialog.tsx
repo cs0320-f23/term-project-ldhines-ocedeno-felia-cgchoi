@@ -82,10 +82,11 @@ const CreateQueueDialog: FC<CreateQueueDialogProps> = ({open, onClose}) => {
         if (currentUser && currentUser.coursePermissions) {
             Promise.all(
                 Object.keys(currentUser.coursePermissions)
-                    .map(courseID => CourseAPI.getCourseProjects(courseID))
+                    .map(courseID => CourseAPI.getCourseProjectNames(courseID))
             )
             .then(res => {
-                const courseProjectList = res.flat(); 
+                const courseProjectList = res.flat();
+                console.log("testing" + courseProjectList)
                 setCourseProjects(courseProjectList);
             })
             .catch(error => {

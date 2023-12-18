@@ -67,15 +67,5 @@ export const QueueListWaitTimer = async (createdAt : Timestamp, claimedAt :Times
     }, [createdAt, claimedAt]);
 
     await CourseAPI.updateProjectFeatures(courseID, projectName, waitTime);
-
-    // useEffect(() => {
-    //     if (waitTime) {
-    //         const updateProjectFeatures = async () => {
-    //             await CourseAPI.updateProjectFeatures(courseID, projectName, waitTime);
-    //         };
-
-    //         updateProjectFeatures();
-    //     }
-    // }, [claimedAt]);
 };
 

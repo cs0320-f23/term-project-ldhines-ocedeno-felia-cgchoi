@@ -111,12 +111,12 @@ const EditCourseDialog: FC<EditCourseDialogProps> = ({course, open, onClose}) =>
                 .then(() =>  {
                     toast.success(`${projectName} was succesfully removed from (${course.code})!`);
                     setRevokeAccessLoading(false);
+                    setProjectList(projectList.filter(project => project !== projectName));
                 })
                 .catch(() => {
                     toast.error('Unable to add project at this time');
                     setRemoveProjectLoading(false);
                 })
-            setProjectList(projectList.filter(project => project !== projectName));
         }
     }
 
