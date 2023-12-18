@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Divider, Paper, Grid, Stack, Typography, TableBody, TableCell, Table, TableRow, TableContainer, TableHead} from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import {useQueues} from "@util/queue/hooks";
@@ -8,11 +8,30 @@ import CreateQueueDialog from "@components/home/CreateQueueDialog";
 import {useAuth} from "@util/auth/hooks";
 import Button from "@components/shared/Button";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DataTransferAPI from "@util/data/dataTransfer";
 
 export default function Analytics() {
 
     const {currentUser, isAuthenticated} = useAuth();
     const isTA = isAuthenticated && currentUser && currentUser.coursePermissions && (Object.keys(currentUser.coursePermissions).length > 0);
+    const [analyticsData, setAnalyticsData] = useState([]);
+
+    useEffect(() => {
+      const fetchDataAndUpdate = async () => {
+
+          const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
+          await DataTransferAPI.sendJSONtoBackend("url", dataFromFirestore);
+          const processedData = await DataTransferAPI.fetchJSONfromBackend("url");
+          setAnalyticsData(processedData)
+
+          
+       
+
+        // fetch data from firestore
+
+    }; 
+    fetchDataAndUpdate();
+  }, []); // empty array -> updates whenever analytics page is opened
 
     const rows = [
       createData("Rattytoullie", 159, 24),
