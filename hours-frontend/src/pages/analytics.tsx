@@ -17,22 +17,43 @@ export default function Analytics() {
     const [analyticsData, setAnalyticsData] = useState([]);
 
     useEffect(() => {
+      let isMounted = true;
+      console.log("useEffect started"); // Initial entry into useEffect
+  
       const fetchDataAndUpdate = async () => {
-
-          const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
-          await DataTransferAPI.sendJSONtoBackend("http://localhost:3000", dataFromFirestore);
-          const processedData = await DataTransferAPI.fetchJSONfromBackend("http://localhost:3000");
-          console.log(processedData)
-          setAnalyticsData(processedData)
-
-          
-       
-
-        // fetch data from firestore
-
-    }; 
-    fetchDataAndUpdate();
-  }, []); // empty array -> updates whenever analytics page is opened
+          console.log("fetchDataAndUpdate started"); // Entry into fetchDataAndUpdate function
+  
+          try {
+              console.log("Attempting to fetch data from Firestore");
+              const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
+              console.log("Data from Firestore:", dataFromFirestore); // Check what data is returned
+  
+              if (isMounted && dataFromFirestore) {
+                  console.log("Sending data to backend");
+                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8080/analytics?sorted=true", dataFromFirestore);
+                  console.log("Processed data received from backend:", processedData); // Check what data is received after processing
+  
+                  if (processedData) {
+                      console.log("Setting state with processed data");
+                      setAnalyticsData(processedData);
+                  }
+              }
+          } catch (error) {
+              if (isMounted) {
+                  console.error("Error during data fetch and update: ", error);
+              }
+          }
+      };
+  
+      fetchDataAndUpdate().then(() => {
+          console.log("fetchDataAndUpdate function completed"); // After function execution
+      });
+  
+      return () => {
+          isMounted = false; // Set the flag to false when the component unmounts
+          console.log("Component unmounted"); // Log when component is unmounting
+      };
+  }, []); // Dependency array // empty array -> updates whenever analytics page is opened
 
     const rows = [
       createData("Rattytoullie", 159, 24),
