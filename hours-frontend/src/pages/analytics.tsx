@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Divider, Paper, Grid, Stack, Typography, TableBody, TableCell, Table, TableRow, TableContainer, TableHead} from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import {useQueues} from "@util/queue/hooks";
@@ -8,11 +8,52 @@ import CreateQueueDialog from "@components/home/CreateQueueDialog";
 import {useAuth} from "@util/auth/hooks";
 import Button from "@components/shared/Button";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DataTransferAPI from "@util/data/dataTransfer";
 
 export default function Analytics() {
 
     const {currentUser, isAuthenticated} = useAuth();
     const isTA = isAuthenticated && currentUser && currentUser.coursePermissions && (Object.keys(currentUser.coursePermissions).length > 0);
+    const [analyticsData, setAnalyticsData] = useState([]);
+
+    useEffect(() => {
+      let isMounted = true;
+      console.log("useEffect started"); // Initial entry into useEffect
+  
+      const fetchDataAndUpdate = async () => {
+          console.log("fetchDataAndUpdate started"); // Entry into fetchDataAndUpdate function
+  
+          try {
+              console.log("Attempting to fetch data from Firestore");
+              const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
+              console.log("Data from Firestore:", dataFromFirestore); // Check what data is returned
+  
+              if (isMounted && dataFromFirestore) {
+                  console.log("Sending data to backend");
+                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8080/analytics?sorted=true", dataFromFirestore);
+                  console.log("Processed data received from backend:", processedData); // Check what data is received after processing
+  
+                  if (processedData) {
+                      console.log("Setting state with processed data");
+                      setAnalyticsData(processedData);
+                  }
+              }
+          } catch (error) {
+              if (isMounted) {
+                  console.error("Error during data fetch and update: ", error);
+              }
+          }
+      };
+  
+      fetchDataAndUpdate().then(() => {
+          console.log("fetchDataAndUpdate function completed"); // After function execution
+      });
+  
+      return () => {
+          isMounted = false; // Set the flag to false when the component unmounts
+          console.log("Component unmounted"); // Log when component is unmounting
+      };
+  }, []); // Dependency array // empty array -> updates whenever analytics page is opened
 
     const rows = [
       createData("Rattytoullie", 159, 24),
