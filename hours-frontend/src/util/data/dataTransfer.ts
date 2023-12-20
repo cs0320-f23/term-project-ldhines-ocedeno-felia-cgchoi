@@ -22,6 +22,7 @@ async function fetchFirebaseData() : Promise<any> {
 
     async function sendJSONtoBackend(backendUrl: string, data: any): Promise<any> {
         console.log("Sending data to backend");
+        console.log(JSON.stringify(data));
         try {
             const response = await fetch(backendUrl, {
                 method: 'POST',

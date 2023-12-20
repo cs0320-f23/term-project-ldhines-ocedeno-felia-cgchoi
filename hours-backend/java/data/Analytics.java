@@ -28,6 +28,10 @@ public class Analytics {
 
 
     public double calculateAverageWaitTime(Project project){
+        System.out.println(project.features());
+        if (project.features().totalTime() == 0) {
+            return 0;
+        }
         double totalTime = project.features().totalTime() / 60; //convert to minutes
         double totalSignups = project.features().numOfStudents();
         return totalTime / totalSignups;

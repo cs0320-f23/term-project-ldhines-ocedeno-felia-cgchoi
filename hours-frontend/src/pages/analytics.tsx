@@ -27,20 +27,38 @@ export default function Analytics() {
               console.log("Attempting to fetch data from Firestore");
               const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
               console.log("Data from Firestore:", dataFromFirestore); // Check what data is returned
-              const projectsMap : Map<String, Map<String, Object>> = dataFromFirestore[0].projects
+              // const projectsMap : Map<Object, Map<Object, Object>> = dataFromFirestore[0].projects
+              // let combinedProjects: Map<Object, Object> = new Map();
+
+              // // Iterate over each entry in the outer map
+              // for (const [outerKey, innerMap] of projectsMap) {
+              //   // Iterate over each entry in the inner map
+              //   for (const [innerKey, value] of innerMap) {
+              //     // Add each value to the combined map
+              //     // Note: This assumes that the innerKey is unique across all inner maps
+              //     combinedProjects.set(innerKey, value);
+              //   }
+              // }
+              // console.log("hell")
+              // console.log("Data from Firestore:", combinedProjects);
+              
               let projects: any = [];
-              console.log("Projects Data:", projectsMap);
-              for (const [key,value] of projectsMap){
-                  const projMap = value;
-                  console.log(projMap)
+              for (const courses of dataFromFirestore) {
+                let projMap;
+                console.log(courses.projects);
+                console.log(typeof courses.projects);
+                for (const [key, value] of Object.entries(courses.projects)) {
+                  projMap = value;
+                }
+                projects.push(projMap);
+                break;
               }
-              
-              
+              console.log(projects);
   
               if (isMounted && dataFromFirestore) {
                   console.log("Sending data to backend");
-                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8585/analytics?sorted=true", dataFromFirestore);
-                  console.log("Processed data received from backend:", projects); // Check what data is received after processing
+                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8585/analytics?sorted=true", projects);
+                  console.log("Processed data received from backend:", processedData); // Check what data is received after processing
   
                   if (processedData) {
                       console.log("Setting state with processed data");
