@@ -27,11 +27,20 @@ export default function Analytics() {
               console.log("Attempting to fetch data from Firestore");
               const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
               console.log("Data from Firestore:", dataFromFirestore); // Check what data is returned
+              const projectsMap : Map<String, Map<String, Object>> = dataFromFirestore[0].projects
+              let projects: any = [];
+              console.log("Projects Data:", projectsMap);
+              for (const [key,value] of projectsMap){
+                  const projMap = value;
+                  console.log(projMap)
+              }
+              
+              
   
               if (isMounted && dataFromFirestore) {
                   console.log("Sending data to backend");
-                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8080/analytics?sorted=true", dataFromFirestore);
-                  console.log("Processed data received from backend:", processedData); // Check what data is received after processing
+                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8585/analytics?sorted=true", dataFromFirestore);
+                  console.log("Processed data received from backend:", projects); // Check what data is received after processing
   
                   if (processedData) {
                       console.log("Setting state with processed data");
