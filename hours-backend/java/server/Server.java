@@ -3,7 +3,7 @@ package server;
 import static spark.Spark.after;
 
 import data.Analytics;
-import data.mocks.WaitTimeMock;
+import data.WaitTime;
 import handlers.AnalyticsHandler;
 import handlers.WaitTimeHandler;
 import spark.Spark;
@@ -45,7 +45,7 @@ public class Server {
 
 
         Spark.post("/analytics", new AnalyticsHandler(new Analytics()));
-        Spark.get("/waittime", new WaitTimeHandler(new WaitTimeMock()));
+        Spark.get("/waittime", new WaitTimeHandler(new WaitTime()));
 
 
 

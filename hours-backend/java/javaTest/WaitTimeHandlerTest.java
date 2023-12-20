@@ -3,15 +3,12 @@ package javaTest;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
-import com.sun.source.tree.AssertTree;
 import data.WaitTimeDatasource;
-import data.mocks.WaitTimeMock;
+import data.WaitTime;
 import handlers.WaitTimeHandler;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import server.DatasourceException;
 import spark.Request;
 import spark.Response;
 
@@ -19,7 +16,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +29,7 @@ public class WaitTimeHandlerTest {
 
     @Before
     public void setUp() {
-        mockData = new WaitTimeMock();
+        mockData = new WaitTime();
         handler = new WaitTimeHandler(mockData);
         mockRequest = mock(Request.class);
         mockResponse = mock(Response.class);
