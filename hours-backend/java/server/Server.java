@@ -32,7 +32,7 @@ public class Server {
      * @throws IOException
      */
     public static void main(String[] args) throws DatasourceException, IOException {
-        int port = 8585;
+        int port = 8485;
         Spark.port(port);
 
 

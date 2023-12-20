@@ -12,9 +12,15 @@ import DataTransferAPI from "@util/data/dataTransfer";
 
 export default function Analytics() {
 
+  type Row = {
+  name: string;
+  visits: number;
+  waittime: number;
+};
+
     const {currentUser, isAuthenticated} = useAuth();
     const isTA = isAuthenticated && currentUser && currentUser.coursePermissions && (Object.keys(currentUser.coursePermissions).length > 0);
-    const [analyticsData, setAnalyticsData] = useState([]);
+    const [analyticsData, setAnalyticsData] = useState({ type: "", data: [] });
 
     useEffect(() => {
       let isMounted = true;
@@ -27,20 +33,7 @@ export default function Analytics() {
               console.log("Attempting to fetch data from Firestore");
               const dataFromFirestore = await DataTransferAPI.fetchFirebaseData();
               console.log("Data from Firestore:", dataFromFirestore); // Check what data is returned
-              // const projectsMap : Map<Object, Map<Object, Object>> = dataFromFirestore[0].projects
-              // let combinedProjects: Map<Object, Object> = new Map();
 
-              // // Iterate over each entry in the outer map
-              // for (const [outerKey, innerMap] of projectsMap) {
-              //   // Iterate over each entry in the inner map
-              //   for (const [innerKey, value] of innerMap) {
-              //     // Add each value to the combined map
-              //     // Note: This assumes that the innerKey is unique across all inner maps
-              //     combinedProjects.set(innerKey, value);
-              //   }
-              // }
-              // console.log("hell")
-              // console.log("Data from Firestore:", combinedProjects);
               
               let projects: any = [];
               for (const courses of dataFromFirestore) {
@@ -53,11 +46,11 @@ export default function Analytics() {
                 projects.push(projMap);
                 break;
               }
-              console.log(projects);
+              
   
               if (isMounted && dataFromFirestore) {
-                  console.log("Sending data to backend");
-                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8585/analytics?sorted=true", projects);
+                  console.log("Sending data to backend: ", projects);
+                  const processedData = await DataTransferAPI.sendJSONtoBackend("http://localhost:8485/analytics?sorted=true", projects);
                   console.log("Processed data received from backend:", processedData); // Check what data is received after processing
   
                   if (processedData) {
@@ -82,45 +75,28 @@ export default function Analytics() {
       };
   }, []); // Dependency array // empty array -> updates whenever analytics page is opened
 
-    let rows = [
-      // createData("Rattytoullie", 159, 24),
-      // createData("AndyBot", 237, 37),
-      // createData("Pong", 262, 24),
-      // createData("TicTacToe", 305, 67),
-      // createData("Fruit Ninja", 356, 49),
-      // createData("Cartoon", 159, 55),
-      // createData("DoodleJump", 222, 40),
-      // createData("Tetris", 398, 72),
-      // createData("Final Project", 304, 86)
-    ];
+    const [rows, setRows] = useState<Row[]>([]);
 
-    // Custom hook to update rows when analyticsData changes
-    const useUpdateRows = (analyticsData: any[], rows: any[]) => {
+    const useUpdateRows = (analyticsData: { type: string, data: any[] } , rows: any[]) => {
+      
       useEffect(() => {
-        console.log(analyticsData[0]);
-        console.log("hello friends");
-        for (const p of Object.entries(analyticsData)) {
-            console.log(p);
-            if (typeof p == typeof Object) {
-              for (const [key, value] of Object.entries(p)) {
-                console.log(value);
-                const val = value.data;
-                let avg = val.averageWaitTime;
-                let pro = val.project;
-                let features = val.features;
-                rows.push(
-                  createData(pro.projectName, features.numOfStudents, avg)
-                );
-              }
-            }
-            
-          }
-      }, [analyticsData, rows]);
+        console.log("Analytics Data",analyticsData.data);
+        const newRows: Row[] = [];
+        for (const p in analyticsData.data){
+          let projectName = analyticsData.data[p].project.projectName
+          let numStudents = analyticsData.data[p].project.features.numOfStudents
+          let averageWaitTime = analyticsData.data[p].averageWaitTime
+          
+          console.log(projectName,numStudents,averageWaitTime)
+          newRows.push(createData(projectName,numStudents,averageWaitTime)) 
+        }
+        setRows(newRows);
+      }, [analyticsData]);
     };
 
     // Usage:
     useUpdateRows(analyticsData, rows);
-
+    console.log(rows,"here")
     return (
       <AppLayout maxWidth={false}>
         {!isTA && (

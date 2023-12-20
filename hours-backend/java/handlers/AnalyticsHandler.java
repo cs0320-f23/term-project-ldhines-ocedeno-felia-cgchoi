@@ -43,7 +43,6 @@ public class AnalyticsHandler implements Route {
             else{
                 this.dataWrapper.processProjects(projects,sorted);
                 List<AnalyticProject> analyticProjects = this.dataWrapper.getData();
-                System.out.println();
                 responseMap.put("type", "success");
                 responseMap.put("data", analyticProjects);
             }
