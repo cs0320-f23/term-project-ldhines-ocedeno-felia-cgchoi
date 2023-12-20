@@ -82,17 +82,44 @@ export default function Analytics() {
       };
   }, []); // Dependency array // empty array -> updates whenever analytics page is opened
 
-    const rows = [
-      createData("Rattytoullie", 159, 24),
-      createData("AndyBot", 237, 37),
-      createData("Pong", 262, 24),
-      createData("TicTacToe", 305, 67),
-      createData("Fruit Ninja", 356, 49),
-      createData("Cartoon", 159, 55),
-      createData("DoodleJump", 222, 40),
-      createData("Tetris", 398, 72),
-      createData("Final Project", 304, 86)
+    let rows = [
+      // createData("Rattytoullie", 159, 24),
+      // createData("AndyBot", 237, 37),
+      // createData("Pong", 262, 24),
+      // createData("TicTacToe", 305, 67),
+      // createData("Fruit Ninja", 356, 49),
+      // createData("Cartoon", 159, 55),
+      // createData("DoodleJump", 222, 40),
+      // createData("Tetris", 398, 72),
+      // createData("Final Project", 304, 86)
     ];
+
+    // Custom hook to update rows when analyticsData changes
+    const useUpdateRows = (analyticsData: any[], rows: any[]) => {
+      useEffect(() => {
+        console.log(analyticsData[0]);
+        console.log("hello friends");
+        for (const p of Object.entries(analyticsData)) {
+            console.log(p);
+            if (typeof p == typeof Object) {
+              for (const [key, value] of Object.entries(p)) {
+                console.log(value);
+                const val = value.data;
+                let avg = val.averageWaitTime;
+                let pro = val.project;
+                let features = val.features;
+                rows.push(
+                  createData(pro.projectName, features.numOfStudents, avg)
+                );
+              }
+            }
+            
+          }
+      }, [analyticsData, rows]);
+    };
+
+    // Usage:
+    useUpdateRows(analyticsData, rows);
 
     return (
       <AppLayout maxWidth={false}>

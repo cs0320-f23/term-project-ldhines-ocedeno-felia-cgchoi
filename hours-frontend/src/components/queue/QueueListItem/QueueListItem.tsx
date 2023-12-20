@@ -46,12 +46,12 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
         QueueAPI.editTicket(ticket.id, ticket.user.UserID, queue.id, TicketStatus.StatusClaimed, ticket.description)
             .catch(() => toast.error(errors.UNKNOWN));
 
-        if (ticket.claimedAt) {
+        // if (ticket.claimedAt) {
             // for (const i in queue.course.projects) {
             //     if queue.course.projects[i].projectName === que
             // }
-            QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, queue.course.id, queue.project.projectName);
-        }
+            // QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, queue.course.id, queue.project.projectName);
+        // }
         //queue.projects[queue.course.id].projectName
     }
 
@@ -74,7 +74,7 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
     });
 
     // useEffect(() => {
-    //     QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, ticket.id, ticket.pr)
+        // QueueListWaitTimer(ticket.createdAt, ticket.claimedAt, ticket.id, ticket.pr)
     // })
 
     return (<>
@@ -150,8 +150,8 @@ const QueueListItem: FC<QueueListItemProps> = ({queue, ticket, position}) => {
                         {isClaimed && ticket.claimedAt &&
                             <QueueListItemTimer 
                             claimedAt={ticket.claimedAt}
-                            createdAt={ticket.createdAt}
-                            course_id={queue.id}
+                            // createdAt={ticket.createdAt}
+                            // course_id={queue.id}
                             />}
                         {isMissing &&
                             <Chip label="Missing" size="small" color="error" sx={{fontWeight: 500}}/>}

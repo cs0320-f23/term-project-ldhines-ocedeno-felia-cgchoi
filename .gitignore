@@ -29,3 +29,4 @@ hours-frontend/.next/cache/webpack/client-development/4.pack
 *.pack
 *.xml
 *.hot-update.js
+*._buildManifest.js

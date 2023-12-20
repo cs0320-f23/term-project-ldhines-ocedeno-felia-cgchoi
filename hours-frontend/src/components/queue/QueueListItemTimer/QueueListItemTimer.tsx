@@ -9,12 +9,12 @@ export interface QueueListItemTimerProps {
     claimedAt: Timestamp;
 }
 
-export interface QueueListWaitTimerProps {
-    claimedAt: Timestamp;
-    createdAt: Timestamp;
-    courseID: string;
-    projectName: string;
-}
+// export interface QueueListWaitTimerProps {
+//     claimedAt: Timestamp;
+//     createdAt: Timestamp;
+//     courseID: string;
+//     projectName: string;
+// }
 
 const calculateClaimDuration = (claimedAtSeconds?: number): string => {
     if (!claimedAtSeconds) {

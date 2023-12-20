@@ -69,6 +69,7 @@ export function useTickets(queueID: string): [Ticket[] | undefined, boolean] {
                 res.push({id: doc.id, ...data} as Ticket);
             });
 
+            console.log(res);
             setTickets(res);
             setLoading(false);
         });
