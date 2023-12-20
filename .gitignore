@@ -23,6 +23,7 @@ __pycache__/
 
 .env
 
+hours-backend/java/target/classes/pom.xml
 dev-firebase-config.json
 hours-frontend/.next/cache/webpack/client-development/4.pack
 *.json
