@@ -42,8 +42,8 @@ export default function Analytics() {
                 console.log(typeof courses.projects);
                 for (const [key, value] of Object.entries(courses.projects)) {
                   projMap = value;
+                  projects.push(projMap);
                 }
-                projects.push(projMap);
                 break;
               }
               
@@ -76,26 +76,47 @@ export default function Analytics() {
   }, []); // Dependency array // empty array -> updates whenever analytics page is opened
 
     const [rows, setRows] = useState<Row[]>([]);
+    const [chartProjects, setChartProjects] = useState<string[]>([]);
+    const [chartData, setChartData] = useState<number[]>([]);
 
     const useUpdateRows = (analyticsData: { type: string, data: any[] } , rows: any[]) => {
       
       useEffect(() => {
-        console.log("Analytics Data",analyticsData.data);
+      
+        console.log("Analytics Data", analyticsData.data);
         const newRows: Row[] = [];
-        for (const p in analyticsData.data){
-          let projectName = analyticsData.data[p].project.projectName
-          let numStudents = analyticsData.data[p].project.features.numOfStudents
-          let averageWaitTime = analyticsData.data[p].averageWaitTime
-          
-          console.log(projectName,numStudents,averageWaitTime)
-          newRows.push(createData(projectName,numStudents,averageWaitTime)) 
+        const newChartProjects: string[] = [];
+        const newChartData: number[] = [];
+        for (const p in analyticsData.data) {
+          let projectName = analyticsData.data[p].project.projectName;
+          let numStudents =
+            analyticsData.data[p].project.features.numOfStudents;
+          let averageWaitTime = analyticsData.data[p].averageWaitTime;
+
+          console.log(projectName, numStudents, averageWaitTime);
+          newRows.push(createData(projectName, numStudents, averageWaitTime));
+          newChartProjects.push(projectName);
+          newChartData.push(numStudents);
+
+          console.log(newChartData);
+          console.log(newChartProjects);
         }
         setRows(newRows);
+        setChartProjects(newChartProjects)
+        setChartData(newChartData);
       }, [analyticsData]);
     };
 
     // Usage:
     useUpdateRows(analyticsData, rows);
+    const nums : number[] = [];
+    for (let i = 0; i < chartData.length; i++) {
+      nums.push(chartData[i])
+    }
+    nums.push(1);
+    // nums.splice(0, 1);
+    console.log(nums);
+    
     console.log(rows,"here")
     return (
       <AppLayout maxWidth={false}>
@@ -170,21 +191,11 @@ export default function Analytics() {
                 xAxis={[
                   {
                     scaleType: "band",
-                    data: [
-                      "Rattytoullie",
-                      "AndyBot",
-                      "Pong",
-                      "TicTacToe",
-                      "Fruit Ninja",
-                      "Cartoon",
-                      "DoodleJump",
-                      "Tetris",
-                      "Final Project",
-                    ],
+                    data: chartProjects,
                   },
                 ]}
                 series={[
-                  { data: [4, 3, 5, 6, 4, 6, 7, 9, 10], color: "#673ab7" },
+                  { data: nums, color: "#673ab7" },
                 ]}
                 width={1000}
                 height={300}
